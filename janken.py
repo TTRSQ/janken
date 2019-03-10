@@ -2,7 +2,8 @@
 
 import sys
 import requests
-import json 
+import json
+from abc import ABCMeta, abstractmethod
 
 # TODO: エラー処理
 
@@ -16,8 +17,9 @@ class Janken:
         "scissors": [3, 2],
     }
 
-    def result(field_weapons, side):
-
+    @classmethod
+    def result(cls, field_weapons, side):
+        pass
 
 #======== プレーヤー =========
 class JankenPlayer(metaclass=ABCMeta):
@@ -27,7 +29,7 @@ class JankenPlayer(metaclass=ABCMeta):
     def get_name(self):
         return self.name
 
-    def validate_weapon(weapon):
+    def validate_weapon(self, weapon):
         for _weapon in Janken.weapons.keys():
             if weapon == _weapon:
                 return
@@ -41,35 +43,38 @@ class JankenPlayer(metaclass=ABCMeta):
 class ShellUser(JankenPlayer):
     def get_weapon(self):
         weapon = input()
+        self.validate_weapon(weapon)
         return weapon
 
 class Comupter(JankenPlayer):
     def get_weapon(self):
-        json_str = requests.get("https://github.com")
-        dic_data = json.load(json_str)
-        return dic_data["weapon"]
+        json_str = requests.get("https://example.com/janken").text
+        dic_data = json.loads(json_str)
+        weapon = dic_data["weapon"]
+        self.validate_weapon(weapon)
+        return weapon
 
 
 #======== 試合管理 =========
 class JankenManager:
     def __init__(self, players, max_num):
-        self.janken  = Janken()
-        slef.players = players
+        self.players = players
         self.max_num = max_num
     
     def execute(self):
-        field_weapons = []
-        for player in players:
-            field_weapons.append(player.get_weapon)
-        
-        side = self.result(field_weapons, )
-
+        for i in range(self.max_num):
+            field_weapons = []
+            for player in self.players:
+                weapon = player.get_weapon()
+                print(player.get_name(), "select", weapon)
+                field_weapons.append(weapon)
+                Janken.result(field_weapons, weapon)
 
 args = sys.argv
-janken_times = args[1]
+janken_times = int(args[1])
 
 janken_manager = JankenManager(
-    [ShellUser(), Comupter()],
+    [ShellUser("You"), Comupter("Com")],
     janken_times
 )
 
